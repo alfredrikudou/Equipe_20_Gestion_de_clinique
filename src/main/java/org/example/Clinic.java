@@ -24,6 +24,13 @@ public class Clinic {
         return fileMedecin.size() == 0;
     }
 
+    public Boolean fileMedecinEstVide() {
+        return fileMedecin.size() == 0;
+    }
+    public Boolean fileRadioEstVide() {
+        return fileRadio.size() == 0;
+    }
+
     public Patient getPatientMedecin(Patient patient) {
         Integer patientIndex = fileMedecin.indexOf(patient);
         return patientIndex == -1 ? null : fileMedecin.get(patientIndex);
@@ -47,6 +54,17 @@ public class Clinic {
             if (patient.getName().equals(name)) {
                 return patient;
             }
+        }
+        return null;
+    }
+
+    public Patient traiterProchainPatient() {
+        if (fileMedecin.size() > 0) {
+            Patient patient =  fileMedecin.removeFirst();
+            if (patient.getSymptom() == VisibleSymptom.SPRAIN || patient.getSymptom() == VisibleSymptom.BROKEN_BONE) {
+                patient = fileRadio.removeFirst();
+            }
+            return patient;
         }
         return null;
     }

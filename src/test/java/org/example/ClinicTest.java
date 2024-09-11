@@ -1,9 +1,8 @@
 package org.example;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.jupiter.api.Test;
+
+import static org.junit.Assert.*;
 
 public class ClinicTest {
     @Test
@@ -54,5 +53,30 @@ public class ClinicTest {
 
         Patient p2 = clinic.getPatientRadio("David");
         assertTrue(p2.equals(patient));
+    }
+
+    @Test
+    void quandAppelerPatient_RetirerPatientDeLaFileMedecin() {
+        Clinic clinic = new Clinic();
+
+        clinic.triagePatient("John", 0, VisibleSymptom.MIGRAINE);
+        assertFalse(clinic.estVide());
+
+        Patient patient = clinic.traiterProchainPatient();
+        assertTrue(clinic.estVide());
+
+    }
+
+    @Test
+    void quandAppelerPatientRadioLogie_RetirerPatientDeLaFileRadiologie() {
+        Clinic clinic = new Clinic();
+
+        clinic.triagePatient("Doe", 0, VisibleSymptom.SPRAIN);
+        assertFalse(clinic.fileRadioEstVide());
+
+
+        Patient patient = clinic.traiterProchainPatient();
+        assertTrue(clinic.fileRadioEstVide());
+
     }
 }
