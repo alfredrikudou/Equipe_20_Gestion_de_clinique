@@ -1,22 +1,49 @@
 package org.example;
 
 import java.util.LinkedList;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class Clinic {
-    private LinkedList<Patient> fileMedecin; 
-    private LinkedList<Patient> fileRadio; 
+    private Queue<Patient> fileMedecin;
+    private Queue<Patient> fileRadio;
+    private TriageType doctorTriageType;
+    private TriageType radiologyTriageType;
 
-
-    public Clinic(/* ... */) {
+    public Clinic() {
+        this.doctorTriageType = TriageType.FIFO;
+        this.radiologyTriageType = TriageType.FIFO;
         fileMedecin = new LinkedList<>();
         fileRadio = new LinkedList<>();
     }
 
+    public Clinic(TriageType doctorTriageType, TriageType radiologyTriageType) {
+        this.doctorTriageType = doctorTriageType;
+        this.radiologyTriageType = radiologyTriageType;
+
+        if (doctorTriageType == TriageType.GRAVITY) {
+            fileMedecin = new PriorityQueue<>((p1, p2) -> Integer.compare(p2.getGravite(), p1.getGravite()));
+        } else {
+            fileMedecin = new LinkedList<>();
+        }
+
+        if (doctorTriageType == TriageType.GRAVITY) {
+            fileMedecin = new PriorityQueue<>((p1, p2) -> Integer.compare(p2.getGravite(), p1.getGravite()));
+        } else {
+            fileRadio = new LinkedList<>();
+        }
+    }
+
     public void triagePatient(String name, int gravity, VisibleSymptom visibleSymptom) {
         Patient patient = new Patient(name, gravity, visibleSymptom);
-        fileMedecin.addLast(patient);
+        if (doctorTriageType == TriageType.FIFO) {
+            fileMedecin.add(patient);
+        } else {
+
+        }
+
         if (visibleSymptom == VisibleSymptom.SPRAIN || visibleSymptom == VisibleSymptom.BROKEN_BONE) {
-            fileRadio.addLast(patient);
+            fileRadio.add(patient);
         }
     }
 
@@ -31,42 +58,54 @@ public class Clinic {
         return fileRadio.size() == 0;
     }
 
-    public Patient getPatientMedecin(Patient patient) {
-        Integer patientIndex = fileMedecin.indexOf(patient);
-        return patientIndex == -1 ? null : fileMedecin.get(patientIndex);
+    public Patient getFirstPatientMedecin() {
+        return fileMedecin.peek();
     }
 
-    public Patient getPatientMedecin(String name) {
-        for (Patient patient: fileMedecin) {
-            if (patient.getName().equals(name)) {
-                return patient;
-            }
+    public Patient getLastMedecin() {
+        Patient result = null;
+        for (Patient p : fileMedecin) {
+            result = p;
         }
-        return null;
+        return result;
     }
 
-    public Patient getPatientMedecin(Integer patientIndex) {
-        return patientIndex == -1 ? null : fileMedecin.get(patientIndex);
+    public Patient getFirstPatientRadio() {
+        return fileRadio.peek();
     }
 
-    public Patient getPatientRadio(String name) {
-        for (Patient patient: fileRadio) {
-            if (patient.getName().equals(name)) {
-                return patient;
-            }
+    public Patient getLastRadio() {
+        Patient result = null;
+        for (Patient p : fileRadio) {
+            result = p;
         }
-        return null;
+        return result;
     }
 
     public Patient traiterProchainPatient() {
         if (fileMedecin.size() > 0) {
-            Patient patient =  fileMedecin.removeFirst();
+            Patient patient =  fileMedecin.poll();
             if (patient.getSymptom() == VisibleSymptom.SPRAIN || patient.getSymptom() == VisibleSymptom.BROKEN_BONE) {
-                patient = fileRadio.removeFirst();
+                patient = fileRadio.poll();
             }
             return patient;
         }
         return null;
+    }
+
+    public Patient traiterProchainPatientMedecin() {
+        if (fileMedecin.size() > 0) {
+            return fileMedecin.poll();
+        }
+        return null;
+    }
+
+    public Patient traiterProchainPatientRadio() {
+        if (fileRadio.size() > 0) {
+            return fileRadio.poll();
+        }
+        return null;
+
     }
 
 }

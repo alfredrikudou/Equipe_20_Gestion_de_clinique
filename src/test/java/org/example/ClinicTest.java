@@ -18,11 +18,10 @@ public class ClinicTest {
         Patient patient = new Patient("David", 0, VisibleSymptom.MIGRAINE);
         clinic.triagePatient(patient.getName(), patient.getGravite(), patient.getSymptom());
 
-        Patient p = clinic.getPatientMedecin("David");
+        Patient p = clinic.getFirstPatientMedecin();
         assertTrue(p.equals(patient));
 
-        Patient p2 = clinic.getPatientRadio("David");
-        assertNull(p2);
+        assertTrue(clinic.fileRadioEstVide());
     }
 
     @Test
@@ -34,11 +33,11 @@ public class ClinicTest {
         clinic.triagePatient("John", 0, VisibleSymptom.MIGRAINE);
         clinic.triagePatient(patientDoe.getName(), patientDoe.getGravite(), patientDoe.getSymptom());
 
-        Patient p = clinic.getPatientMedecin(1);
-        assertTrue(p.equals(patientDoe));
+        Patient p = clinic.traiterProchainPatientMedecin();
+        p = clinic.traiterProchainPatientMedecin(); // on retire le second patient de la Queue
 
-        Patient p2 = clinic.getPatientRadio("Doe");
-        assertNull(p2);
+        assertTrue(p.equals(patientDoe));
+        assertTrue(clinic.fileRadioEstVide());
     }
 
     @Test
@@ -48,10 +47,10 @@ public class ClinicTest {
         Patient patient = new Patient("David", 0, VisibleSymptom.SPRAIN);
         clinic.triagePatient(patient.getName(), patient.getGravite(), patient.getSymptom());
 
-        Patient p = clinic.getPatientMedecin("David");
+        Patient p = clinic.getFirstPatientMedecin();
         assertTrue(p.equals(patient));
 
-        Patient p2 = clinic.getPatientRadio("David");
+        Patient p2 = clinic.getFirstPatientRadio();
         assertTrue(p2.equals(patient));
     }
 
@@ -78,5 +77,30 @@ public class ClinicTest {
         Patient patient = clinic.traiterProchainPatient();
         assertTrue(clinic.fileRadioEstVide());
 
+    }
+
+    @Test
+    void quandPatientDansFileAttente_AlorsPatientAvecGrandeGravitePostionUn() {
+        Clinic clinic = new Clinic(TriageType.GRAVITY, TriageType.FIFO);
+        clinic.triagePatient("John", 0, VisibleSymptom.MIGRAINE);
+        clinic.triagePatient("Doe", 7, VisibleSymptom.FLU);
+
+        Patient p = clinic.getFirstPatientMedecin();
+        Patient patientDoe = new Patient("Doe", 7, VisibleSymptom.FLU);
+
+        assertTrue(p.equals(patientDoe));
+    }
+
+    @Test
+    void quandPatientDansLesFilesAttentes_AlorsPatientGrandePrioriteEnRadioLogie() {
+        Clinic clinic = new Clinic(TriageType.GRAVITY, TriageType.FIFO);
+        clinic.triagePatient("John", 0, VisibleSymptom.BROKEN_BONE);
+        clinic.triagePatient("Doe", 7, VisibleSymptom.SPRAIN);
+
+        Patient p = clinic.traiterProchainPatientRadio();
+        p = clinic.traiterProchainPatientRadio();
+        Patient patientDoe = new Patient("Doe", 7, VisibleSymptom.FLU);
+
+        assertTrue(p.equals(patientDoe));
     }
 }

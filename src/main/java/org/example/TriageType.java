@@ -1,5 +1,6 @@
 package org.example;
 
 public enum TriageType {
-    FIFO
+    FIFO,
+    GRAVITY
 }
